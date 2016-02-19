@@ -1,11 +1,12 @@
 
 import lldb
 from PIL import Image
+from pylab import *
 import struct
 from subprocess import call
 from time import strftime
-from os.path import expanduser
 import os
+import clipboard
 
 
 ##################################################
@@ -29,6 +30,12 @@ def iw(debugger, command, result, internal_dict):
     process = target.GetProcess()
     thread = process.GetSelectedThread()
     frame = thread.GetFrameAtIndex(0)
+
+    if not target.IsValid() or not process.IsValid():
+        raise DebuggerError("Unable to get target/process")
+
+    options = lldb.SBExpressionOptions()
+    options.SetIgnoreBreakpoints()
 
     # command holds the argument passed to im_show(),
     # e.g., the name of the Mat to be displayed.
@@ -210,15 +217,16 @@ def showImage(debugger, matInfo):
     img.putdata(image_data)
 
     # Save to file and open it.
-    TEMP_FOLDER = expanduser("~") + "/lldb/iw_temp/"
+    TEMP_FOLDER = "/Data/lldb/"
     imageFolder = str(TEMP_FOLDER) + \
         str(matInfo['name']) + "_" + strftime("%H_%M_%S") + ".png"
 
-    data = str(matInfo['name']) + " = double\\(imread\\("+"\\'" + imageFolder + "\\'" + "\\)\\) \\/ 255.0\\; figure\\(\\)\\; imshow\\(" + str(matInfo['name']) + "\\)\\; system\\(\\'find " + TEMP_FOLDER + " -mtime +1 -delete  \\'\\)\\;"
-    os.system("echo " + data.strip() + " | pbcopy")
+    data = str(matInfo['name']) + " = double(imread('" + imageFolder + "'));"
+    data += "figure;imagesc(" + str(matInfo['name']) + "); colormap gray; axis image"
+    clipboard.copy(data)
 
     if not os.path.exists(TEMP_FOLDER):
         os.mkdir(TEMP_FOLDER)
     img.save(imageFolder)
     print imageFolder
-    os.system("python " + expanduser("~") + "/lldb/iw_visualizer.py " + imageFolder)
+    os.system("python " + os.path.dirname(os.path.realpath(__file__)).replace(" ", "\ ") + "/iw_visualizer.py " + imageFolder)
