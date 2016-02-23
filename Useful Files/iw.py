@@ -1,7 +1,7 @@
 
 import lldb
 from PIL import Image
-from pylab import *
+import numpy as np
 import struct
 from subprocess import call
 from time import strftime
@@ -187,7 +187,7 @@ def showImage(debugger, matInfo):
         print ('Only 1 or 3 channels supported\n')
         return
 
-    # Fit the opencv elemente data in the PIL element data
+    # Fit the opencv element data in the PIL element data
     if matInfo['data_symbol'] == 'b':
         image_data = [i+128 for i in image_data]
     elif matInfo['data_symbol'] == 'H':
@@ -196,7 +196,7 @@ def showImage(debugger, matInfo):
         image_data = [(i + 32768) >> 8 for i in image_data]
     elif matInfo['data_symbol'] == 'i':
         image_data = [(i + 2147483648) >> 24 for i in image_data]
-    elif matInfo['data_symbol'] in ('f', 'd'):
+    elif matInfo['data_symbol'] in ('d'):
         # A float image is discretized in 256 bins for display.
         max_image_data = max(image_data)
         min_image_data = min(image_data)
@@ -214,7 +214,22 @@ def showImage(debugger, matInfo):
 
     # Show image.
     img = Image.new(mode, (width, height))
-    img.putdata(image_data)
+
+    # Save float PNG if the image is float
+    if matInfo['data_symbol'] in ('f'):
+
+        # Create RGBA
+        imgRGBA = np.zeros((height, width, 4), np.uint8)
+        data_np = np.array(image_data)
+        data_np = data_np.astype(np.float32)
+        imgRGBA.data = data_np
+        im = Image.fromarray(imgRGBA, 'RGBA')
+
+        # BGRA for OpenCV notation
+        r,g,b,a = im.split()
+        img = Image.merge("RGBA", (b, g, r, a))
+    else:
+        img.putdata(image_data)
 
     # Save to file and open it.
     TEMP_FOLDER = "/Data/lldb/"
@@ -227,6 +242,6 @@ def showImage(debugger, matInfo):
 
     if not os.path.exists(TEMP_FOLDER):
         os.mkdir(TEMP_FOLDER)
-    img.save(imageFolder)
+    img.save(imageFolder, "PNG")
     print imageFolder
     os.system("python " + os.path.dirname(os.path.realpath(__file__)).replace(" ", "\ ") + "/iw_visualizer.py " + imageFolder)
