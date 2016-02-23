@@ -217,7 +217,6 @@ def showImage(debugger, matInfo):
 
     # Save float PNG if the image is float
     if matInfo['data_symbol'] in ('f'):
-
         # Create RGBA
         imgRGBA = np.zeros((height, width, 4), np.uint8)
         data_np = np.array(image_data)
@@ -233,11 +232,21 @@ def showImage(debugger, matInfo):
 
     # Save to file and open it.
     TEMP_FOLDER = "/Data/lldb/"
-    imageFolder = str(TEMP_FOLDER) + \
-        str(matInfo['name']) + "_" + strftime("%H_%M_%S") + ".png"
+    imageFolder = str(TEMP_FOLDER) + str(matInfo['name']) + "_" + strftime("%H_%M_%S") + ".png"
 
-    data = str(matInfo['name']) + " = double(imread('" + imageFolder + "'));"
-    data += "figure;imagesc(" + str(matInfo['name']) + "); colormap gray; axis image"
+    if matInfo['data_symbol'] in ('f'):
+        data = str(matInfo['name']) + " = double(imread32f('" + imageFolder + "'));"
+    else:
+        data = str(matInfo['name']) + " = imread('" + imageFolder + "');"
+
+    data += "figure;imagesc(" + str(matInfo['name']) + "); "
+    data += "title(" + str(matInfo['name']) + "); "
+    data += "axis image; "
+
+    if matInfo['data_symbol'] in ('b', 'B') and n_channel == 1:
+        data += "colormap gray"
+    elif not n_channel == 3:
+        data += "colormap jet"
     clipboard.copy(data)
 
     if not os.path.exists(TEMP_FOLDER):
