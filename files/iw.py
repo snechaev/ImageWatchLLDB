@@ -1,4 +1,3 @@
-
 import lldb
 from PIL import Image
 import numpy as np
@@ -52,7 +51,7 @@ def iw(debugger, command, result, internal_dict):
     printMatInfo(matInfo)
 
     # Show the image.
-    showImage(debugger, matInfo)
+    # showImage(debugger, matInfo)
 
 
 ##################################################
@@ -231,7 +230,7 @@ def showImage(debugger, matInfo):
         img.putdata(image_data)
 
     # Save to file and open it.
-    TEMP_FOLDER = "/Data/lldb/"
+    TEMP_FOLDER = "/Data/1_lldb/"
     imageFolder = str(TEMP_FOLDER) + str(matInfo['name']) + "_" + strftime("%H_%M_%S") + ".png"
 
     if matInfo['data_symbol'] in ('f'):
