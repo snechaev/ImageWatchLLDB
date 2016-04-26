@@ -16,7 +16,7 @@ except ImportError:
 
 # Write necessary files
 with open(os.path.join(os.path.expanduser('~'), '.pythonrc'), 'a') as currFile:
-	currFile.write('import sys\n  sys.path = sys.path + ["/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python"]')
+    currFile.write('import sys\n  sys.path = sys.path + ["/Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/Python"]')
 
 with open(os.path.join(os.path.expanduser('~'), '.bash_profile'), 'a') as currFile:
     currFile.write('# LLDB debug\n  export PYTHONSTARTUP="$HOME/.pythonrc"\n')
