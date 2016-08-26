@@ -28,7 +28,8 @@ def iw(debugger, command, result, internal_dict):
     target = debugger.GetSelectedTarget()
     process = target.GetProcess()
     thread = process.GetSelectedThread()
-    frame = thread.GetFrameAtIndex(0)
+    #frame = thread.GetFrameAtIndex(0)
+    frame = thread.GetSelectedFrame();
 
     # command holds the argument passed to im_show(),
     # e.g., the name of the Mat to be displayed.
@@ -221,4 +222,8 @@ def showImage(debugger, matInfo):
         os.mkdir(TEMP_FOLDER)
     img.save(imageFolder)
     print imageFolder
-    os.system("python " + expanduser("~") + "/lldb/iw_visualizer.py " + imageFolder)
+    #os.system("python " + expanduser("~") + "/lldb/iw_visualizer.py " + imageFolder)
+    tmp = "/usr/local/bin/python " + os.path.dirname(os.path.realpath(__file__)).replace(" ", "\ ") + "/iw_visualizer.py " + imageFolder
+    print tmp;
+    os.system(tmp)
+    print "end"
